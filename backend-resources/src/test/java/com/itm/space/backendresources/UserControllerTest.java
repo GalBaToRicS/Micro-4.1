@@ -1,4 +1,4 @@
-package com.itm.space;
+package com.itm.space.backendresources;
 
 import com.itm.space.backendresources.api.request.UserRequest;
 import com.itm.space.backendresources.api.response.UserResponse;
