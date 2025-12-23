@@ -32,12 +32,9 @@ public class UserControllerTest extends BaseIntegrationTest {
             "Test firstname",
             "Test lastname");
 
-    //все методы используют mvc.perform(), который может бросать Exception
-    //поэтому все тесты также throws Exception
-
-    @Test //корректность ответа, если пользователь найден
+    @Test
     @WithMockUser(roles = "MODERATOR")
-    public void getById_success() throws Exception {
+    public void getByIdSuccess() throws Exception {
         UserResponse user = new UserResponse(
                 "test",
                 "test",
@@ -48,7 +45,6 @@ public class UserControllerTest extends BaseIntegrationTest {
         when(userService.getUserById(UUID.fromString("f37b9ce3-523c-408c-b8cf-121f506b4985")))
                 .thenReturn(user);
 
-        //проверка правильности возвращаемого ответа
         mvc.perform(get("/api/users/{id}", UUID.fromString("f37b9ce3-523c-408c-b8cf-121f506b4985"))
                         .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
@@ -59,46 +55,42 @@ public class UserControllerTest extends BaseIntegrationTest {
                 .andExpect(jsonPath("$.groups[0]").value("Moderators"));
     }
 
-    @Test //Исключение, если пользователь не найден
+    @Test
     @WithMockUser(roles = "MODERATOR")
-    public void getById_userNotFound() throws Exception {
+    public void getByIdUserNotFound() throws Exception {
         when(userService.getUserById(any())).thenThrow(new BackendResourcesException("Exception", HttpStatus.INTERNAL_SERVER_ERROR));
 
-        //если пользователь не найден, userService.getUserById() бросает
-        //BackendResourcesException со статусом INTERNAL_SERVER_ERROR
         mvc.perform(get("/api/users/{id}", UUID.randomUUID())
                         .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isInternalServerError());
     }
 
-    @Test //проверка, что контроллер требует авторизации
-    public void getById_notAuthorized() throws Exception {
+    @Test
+    public void getByIdNotAuthorized() throws Exception {
         mvc.perform(get("/api/users/{id}", UUID.fromString("f37b9ce3-523c-408c-b8cf-121f506b4985"))
                         .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isUnauthorized());
     }
 
-    @Test //проверка, что права валидируются
+    @Test
     @WithMockUser(roles = "other")
-    public void getById_incorrectRoles() throws Exception {
+    public void getByIdIncorrectRoles() throws Exception {
         mvc.perform(get("/api/users/{id}", UUID.fromString("f37b9ce3-523c-408c-b8cf-121f506b4985"))
                         .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isForbidden());
     }
 
-    //
-
-    @Test //корректность ответа при создании пользователя
+    @Test
     @WithMockUser(roles = "MODERATOR")
-    public void create_success() throws Exception {
+    public void createSuccess() throws Exception {
         mvc.perform(requestWithContent(post("/api/users")
                         .contentType(MediaType.APPLICATION_JSON), validUserRequest))
                 .andExpect(status().isOk());
     }
 
-    @Test //возврат исключения в ответе, если пользователь уже создан
+    @Test
     @WithMockUser(roles = "MODERATOR")
-    public void create_Exception() throws Exception {
+    public void createException() throws Exception {
         doThrow(new BackendResourcesException("WebApplicationException", HttpStatus.CONFLICT))
                 .when(userService).createUser(any());
 
@@ -107,9 +99,9 @@ public class UserControllerTest extends BaseIntegrationTest {
                 .andExpect(status().isConflict());
     }
 
-    @Test //тело запроса должно валидироваться при создании пользователя
+    @Test
     @WithMockUser(roles = "MODERATOR")
-    public void create_notValidUsername() throws Exception {
+    public void createNotValidUsername() throws Exception {
         UserRequest invalidUserRequest = new UserRequest(
                 "", //ошибка
                 "email@test.test",
@@ -122,24 +114,24 @@ public class UserControllerTest extends BaseIntegrationTest {
                 .andExpect(status().is4xxClientError());
     }
 
-    @Test //валидация прав
+    @Test
     @WithMockUser(roles = "other")
-    public void create_incorrectRoles() throws Exception {
+    public void createIncorrectRoles() throws Exception {
         mvc.perform(requestWithContent(post("/api/users")
                         .contentType(MediaType.APPLICATION_JSON), validUserRequest))
                 .andExpect(status().isForbidden());
     }
 
-    @Test //проверка, что контроллер требует авторизации
-    public void create_notAuthorized() throws Exception {
+    @Test
+    public void createNotAuthorized() throws Exception {
         mvc.perform(requestWithContent(post("/api/users")
-                        .contentType(MediaType.APPLICATION_JSON),validUserRequest))
+                        .contentType(MediaType.APPLICATION_JSON), validUserRequest))
                 .andExpect(status().isUnauthorized());
     }
 
     @Test
     @WithMockUser(roles = "MODERATOR")
-    public void hello_success() throws Exception {
+    public void helloSuccess() throws Exception {
         mvc.perform(get("/api/users/hello")
                         .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
@@ -148,14 +140,14 @@ public class UserControllerTest extends BaseIntegrationTest {
 
     @Test //валидация прав
     @WithMockUser(roles = "other")
-    public void hello_incorrectRoles() throws Exception {
+    public void helloIncorrectRoles() throws Exception {
         mvc.perform(get("/api/users/hello")
                         .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isForbidden());
     }
 
-    @Test //проверка, что контроллер требует авторизации
-    public void hello_notAuthorized() throws Exception {
+    @Test
+    public void helloNotAuthorized() throws Exception {
         mvc.perform(get("/api/users/hello")
                         .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isUnauthorized());

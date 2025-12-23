@@ -32,14 +32,21 @@ public class UserServiceImpl implements UserService {
     private String realm;
 
     public void createUser(UserRequest userRequest) {
+        System.out.println("1");
         CredentialRepresentation password = preparePasswordRepresentation(userRequest.getPassword());
+        System.out.println("2");
         UserRepresentation user = prepareUserRepresentation(userRequest, password);
+        System.out.println("3");
         try {
             Response response = keycloakClient.realm(realm).users().create(user);
+            System.out.println("4");
             String userId = CreatedResponseUtil.getCreatedId(response);
+            System.out.println("5");
             log.info("Created UserId: {}", userId);
+            System.out.println("6");
         } catch (WebApplicationException ex) {
             log.error("Exception on \"createUser\": ", ex);
+            System.out.println("7");
             throw new BackendResourcesException(ex.getMessage(), HttpStatus.resolve(ex.getResponse().getStatus()));
         }
     }
