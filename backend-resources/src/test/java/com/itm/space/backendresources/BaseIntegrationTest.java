@@ -12,18 +12,17 @@ import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilde
 
 import static org.springframework.http.MediaType.APPLICATION_JSON;
 
-
-@SpringBootTest
+@SpringBootTest//(classes = BackendResourcesApplication.class)
 @AutoConfigureMockMvc
 public abstract class BaseIntegrationTest {
+
+    @Autowired
+    protected MockMvc mvc;
 
     private final ObjectWriter contentWriter = new ObjectMapper()
             .configure(SerializationFeature.WRAP_ROOT_VALUE, false)
             .writer()
             .withDefaultPrettyPrinter();
-
-    @Autowired
-    protected MockMvc mvc;
 
     protected MockHttpServletRequestBuilder requestToJson(MockHttpServletRequestBuilder requestBuilder) {
         return requestBuilder
